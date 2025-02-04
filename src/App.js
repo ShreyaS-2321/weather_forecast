@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect, useCallback } from "react";
 
@@ -6,6 +5,7 @@ function App() {
   const [city, setCity] = useState("Delhi");
   const [weatherData, setWeatherData] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const currentDate = new Date();
 
@@ -20,25 +20,32 @@ function App() {
 
   const formattedDate = `${month} ${day}, ${year}`;
 
-  const API_KEY = "bcda10ba323e88e96cb486015a104d1d"; // Replace 'YOUR_API_KEY' with your actual API key from OpenWeatherMap
+  const API_KEY = "bcda10ba323e88e96cb486015a104d1d"; // Replace with your actual API key from OpenWeatherMap
 
   const fetchWeatherData = useCallback(async () => {
+    setLoading(true);  // Set loading to true when we start fetching data
+    setError(null);    // Reset any previous errors
     try {
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
       );
       const data = await response.json();
-      console.log(data);
-      setWeatherData(data);
+      if (response.ok) {
+        setWeatherData(data);
+      } else {
+        throw new Error(data.message || "Error fetching weather data");
+      }
     } catch (error) {
       console.error("Error fetching weather data:", error);
       setError("Error fetching weather data. Please try again later.");
+    } finally {
+      setLoading(false);  // Set loading to false once the request is done
     }
-  }, [city]);  // fetchWeatherData depends on 'city'
+  }, [city]);
 
   useEffect(() => {
     fetchWeatherData();
-  }, [fetchWeatherData]);  // Now this is safe to include as a dependency
+  }, [fetchWeatherData]);
 
   const handleInputChange = (event) => {
     setCity(event.target.value);
@@ -60,39 +67,53 @@ function App() {
       case "Haze":
         return "/images/sun.png";
       case "Clouds":
-          return "/images/clouds.png";
+        return "/images/clouds.png";
       case "Mist":
-        return "/images/mist.png"
+        return "/images/mist.png";
       default:
-        return null;
+        return "/images/default.png"; // Provide a default image if none match
     }
   };
 
   return (
     <div className="App">
       <div className="container">
-        {weatherData && (
-          <>
-            <h1 className="container_date">{formattedDate}</h1>
-            <div className="weather_data">
-              <h2 className="container_city">{weatherData.name}</h2>
-              <img className="container_img" src={getWeatherImg(weatherData.weather[0].main)} width="180px" alt="Weather Icon" />
-              <h2 className="container_degree">{weatherData.main.temp}</h2>
-              <h2 className="country_per">{weatherData.weather[0].main}<span className="degree_icon"></span></h2>
-              <form className="form" onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Enter city name"
-                  value={city}
-                  onChange={handleInputChange}
-                  required
-                />
-                <button type="submit">Get</button>
-              </form>
-            </div>
-          </>
+        <h1 className="container_date">{formattedDate}</h1>
+
+        {/* Show loading spinner if loading */}
+        {loading && <p>Loading...</p>}
+
+        {/* Display error message if there's an error */}
+        {error && <p className="error">{error}</p>}
+
+        {weatherData && !loading && !error && (
+          <div className="weather_data">
+            <h2 className="container_city">{weatherData.name}</h2>
+            <img
+              className="container_img"
+              src={getWeatherImg(weatherData.weather[0].main)}
+              width="180px"
+              alt="Weather Icon"
+            />
+            <h2 className="container_degree">{weatherData.main.temp}°C</h2>
+            <h2 className="country_per">
+              {weatherData.weather[0].main}
+              <span className="degree_icon"></span>
+            </h2>
+          </div>
         )}
+
+        <form className="form" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            className="input"
+            placeholder="Enter city name"
+            value={city}
+            onChange={handleInputChange}
+            required
+          />
+          <button type="submit">Get</button>
+        </form>
       </div>
     </div>
   );
