@@ -21,7 +21,7 @@ function App() {
   const formattedDate = `${month} ${day}, ${year}`;
 
   // Using the environment variable for the API key
-  const API_KEY = process.env.REACT_APP_API_KEY;
+  const API_KEY ="bcda10ba323e88e96cb486015a104d1d";
 
   const fetchWeatherData = useCallback(async () => {
     setLoading(true);  // Set loading to true when we start fetching data
