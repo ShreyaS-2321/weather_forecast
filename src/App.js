@@ -20,6 +20,7 @@ function App() {
 
   const API_KEY = "bcda10ba323e88e96cb486015a104d1d"; // Replace 'YOUR_API_KEY' with your actual API key from OpenWeatherMap
 
+  // Define the fetchWeatherData function
   const fetchWeatherData = async () => {
     try {
       const response = await fetch(
@@ -33,9 +34,10 @@ function App() {
     }
   };
 
+  // Add fetchWeatherData to the dependency array
   useEffect(() => {
     fetchWeatherData();
-  }, [city]); // Add 'city' to the dependency array to refetch when it changes
+  }, [fetchWeatherData, city]); // Added fetchWeatherData and city to dependencies
 
   const handleInputChange = (event) => {
     setCity(event.target.value);
