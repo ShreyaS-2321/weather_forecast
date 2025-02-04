@@ -20,7 +20,8 @@ function App() {
 
   const formattedDate = `${month} ${day}, ${year}`;
 
-  const API_KEY = "bcda10ba323e88e96cb486015a104d1d"; // Replace with your actual API key from OpenWeatherMap
+  // Using the environment variable for the API key
+  const API_KEY = process.env.REACT_APP_API_KEY;
 
   const fetchWeatherData = useCallback(async () => {
     setLoading(true);  // Set loading to true when we start fetching data
@@ -41,7 +42,7 @@ function App() {
     } finally {
       setLoading(false);  // Set loading to false once the request is done
     }
-  }, [city]);
+  }, [city, API_KEY]);
 
   useEffect(() => {
     fetchWeatherData();
@@ -80,12 +81,13 @@ function App() {
       <div className="container">
         <h1 className="container_date">{formattedDate}</h1>
 
-        {/* Show loading spinner if loading */}
+        {/* Show loading state while fetching the data */}
         {loading && <p>Loading...</p>}
 
-        {/* Display error message if there's an error */}
+        {/* Show error if there is one */}
         {error && <p className="error">{error}</p>}
 
+        {/* Show weather data once it has been successfully fetched */}
         {weatherData && !loading && !error && (
           <div className="weather_data">
             <h2 className="container_city">{weatherData.name}</h2>
@@ -103,6 +105,7 @@ function App() {
           </div>
         )}
 
+        {/* Form to enter the city */}
         <form className="form" onSubmit={handleSubmit}>
           <input
             type="text"
