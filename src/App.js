@@ -1,9 +1,11 @@
+import logo from './logo.svg';
 import './App.css';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 function App() {
   const [city, setCity] = useState("Delhi");
   const [weatherData, setWeatherData] = useState(null);
+  const [error, setError] = useState(null);
 
   const currentDate = new Date();
 
@@ -20,8 +22,7 @@ function App() {
 
   const API_KEY = "bcda10ba323e88e96cb486015a104d1d"; // Replace 'YOUR_API_KEY' with your actual API key from OpenWeatherMap
 
-  // Define the fetchWeatherData function
-  const fetchWeatherData = async () => {
+  const fetchWeatherData = useCallback(async () => {
     try {
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
@@ -31,13 +32,13 @@ function App() {
       setWeatherData(data);
     } catch (error) {
       console.error("Error fetching weather data:", error);
+      setError("Error fetching weather data. Please try again later.");
     }
-  };
+  }, [city]);  // fetchWeatherData depends on 'city'
 
-  // Add fetchWeatherData to the dependency array
   useEffect(() => {
     fetchWeatherData();
-  }, [fetchWeatherData, city]); // Added fetchWeatherData and city to dependencies
+  }, [fetchWeatherData]);  // Now this is safe to include as a dependency
 
   const handleInputChange = (event) => {
     setCity(event.target.value);
@@ -59,7 +60,7 @@ function App() {
       case "Haze":
         return "/images/sun.png";
       case "Clouds":
-        return "/images/clouds.png";
+          return "/images/clouds.png";
       case "Mist":
         return "/images/mist.png"
       default:
